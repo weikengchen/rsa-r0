@@ -397,7 +397,9 @@ fn main() {
                 &TEST_MODULUS,
             );
         }
-        add_small::<9, 8>(&mut az_reduce, &res);
+        unsafe {
+            add_small::<9, 2>(&mut az_reduce, &transmute::<&[u32; 8], &[u32; 2]>(&res));
+        }
     }
 
     let mut bz_reduce = bz.clone();
@@ -414,7 +416,9 @@ fn main() {
                 &TEST_MODULUS,
             );
         }
-        add_small::<9, 8>(&mut bz_reduce, &res);
+        unsafe {
+            add_small::<9, 2>(&mut bz_reduce, &transmute::<&[u32; 8], &[u32; 2]>(&res));
+        }
     }
 
     let mut cz_reduce = cz.clone();
@@ -431,7 +435,9 @@ fn main() {
                 &TEST_MODULUS,
             );
         }
-        add_small::<9, 8>(&mut cz_reduce, &res);
+        unsafe {
+            add_small::<9, 2>(&mut cz_reduce, &transmute::<&[u32; 8], &[u32; 2]>(&res));
+        }
     }
 
     let mut kz_reduce = kz.clone();
@@ -448,7 +454,9 @@ fn main() {
                 &TEST_MODULUS,
             );
         }
-        add_small::<9, 8>(&mut kz_reduce, &res);
+        unsafe{
+            add_small::<9, 2>(&mut kz_reduce, &transmute::<&[u32; 8], &[u32; 2]>(&res));
+        }
     }
 
     let mut nz_reduce = nz.clone();
@@ -465,7 +473,9 @@ fn main() {
                 &TEST_MODULUS,
             );
         }
-        add_small::<9, 8>(&mut nz_reduce, &res);
+        unsafe {
+            add_small::<9, 2>(&mut nz_reduce, &transmute::<&[u32; 8], &[u32; 2]>(&res));
+        }
     }
 
     let mut knz_reduce = knz.clone();
@@ -482,7 +492,9 @@ fn main() {
                 &TEST_MODULUS,
             );
         }
-        add_small::<9, 8>(&mut knz_reduce, &res);
+        unsafe {
+            add_small::<9, 2>(&mut knz_reduce, &transmute::<&[u32; 8], &[u32; 2]>(&res));
+        }
     }
 
     let count_after_reduce_a_b_c_k_n_kn = env::get_cycle_count();
