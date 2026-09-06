@@ -120,7 +120,7 @@ fn main() {
     let prover = default_prover();
 
     let timer = std::time::Instant::now();
-    let receipt = prover.prove_elf(env, METHOD_ELF).unwrap();
+    let receipt = prover.prove(env, METHOD_ELF).unwrap().receipt;
     println!("time: {}", timer.elapsed().as_secs_f64());
     receipt.verify(METHOD_ID).unwrap();
 }
