@@ -1,3 +1,5 @@
+#![no_main]
+
 use core::mem::{transmute, MaybeUninit};
 use risc0_zkvm::guest::env;
 risc0_zkvm::guest::entry!(main);
@@ -73,7 +75,7 @@ pub fn sub_and_borrow<const I: usize>(accu: &mut [u32; I], new: &[u32; I]) -> u3
 }
 
 fn main() {
-    let count_before_loading = env::get_cycle_count();
+    let count_before_loading = env::cycle_count();
     // read the task and the witness from the host
     let mut task = MaybeUninit::<Task>::uninit();
     unsafe {
@@ -84,14 +86,14 @@ fn main() {
         env::read_slice(&mut (*task.as_mut_ptr()).long_form_kn);
     }
     let task = unsafe { task.assume_init() };
-    let count_after_loading = env::get_cycle_count();
+    let count_after_loading = env::cycle_count();
 
     // check the length
     assert_eq!(task.long_form_c.len(), 1204);
     assert_eq!(task.k.len(), 264);
     assert_eq!(task.long_form_kn.len(), 1204);
 
-    let count_before_hashing = env::get_cycle_count();
+    let count_before_hashing = env::cycle_count();
 
     // derive the challenge
     use sha2::{Digest, Sha256};
@@ -106,7 +108,7 @@ fn main() {
 
     let final_hash = hasher.finalize().to_vec();
 
-    let count_after_hashing = env::get_cycle_count();
+    let count_after_hashing = env::cycle_count();
 
     const TEST_MODULUS: [u32; 8] = [
         4294967107u32,
@@ -188,7 +190,7 @@ fn main() {
         0u32,
     ];
 
-    let count_before_z = env::get_cycle_count();
+    let count_before_z = env::cycle_count();
 
     let mut z = MaybeUninit::<[[u32; 8]; 43]>::uninit();
     unsafe {
@@ -209,7 +211,7 @@ fn main() {
     }
 
     let z = unsafe { z.assume_init() };
-    let count_after_z = env::get_cycle_count();
+    let count_after_z = env::cycle_count();
 
     let mut az = [0u32; 9];
     let mut bz = [0u32; 9];
@@ -227,7 +229,7 @@ fn main() {
     let c_ptr = unsafe { transmute::<&u8, &[u32; 301]>(&task.long_form_c[0]) };
     let kn_ptr = unsafe { transmute::<&u8, &[u32; 301]>(&task.long_form_kn[0]) };
 
-    let count_before_a_b_k_n = env::get_cycle_count();
+    let count_before_a_b_k_n = env::cycle_count();
 
     let mut res = [0u32; 8];
     for i in 0..22 {
@@ -326,9 +328,9 @@ fn main() {
 
         add_small::<9, 8>(&mut nz, &res);
     }
-    let count_after_a_b_k_n = env::get_cycle_count();
+    let count_after_a_b_k_n = env::cycle_count();
 
-    let count_before_c_kn = env::get_cycle_count();
+    let count_before_c_kn = env::cycle_count();
 
     for i in 0..43 {
         let c_limbs = [
@@ -378,9 +380,9 @@ fn main() {
 
         add_small::<9, 8>(&mut knz, &res);
     }
-    let count_after_c_kn = env::get_cycle_count();
+    let count_after_c_kn = env::cycle_count();
 
-    let count_before_reduce_a_b_c_k_n_kn = env::get_cycle_count();
+    let count_before_reduce_a_b_c_k_n_kn = env::cycle_count();
 
     // try reduce
     let mut az_reduce = az.clone();
@@ -497,9 +499,9 @@ fn main() {
         }
     }
 
-    let count_after_reduce_a_b_c_k_n_kn = env::get_cycle_count();
+    let count_after_reduce_a_b_c_k_n_kn = env::cycle_count();
 
-    let count_before_az_bz_kz_nz = env::get_cycle_count();
+    let count_before_az_bz_kz_nz = env::cycle_count();
     let mut az_times_bz = [0u32; 8];
     unsafe {
         sys_bigint(
@@ -524,9 +526,9 @@ fn main() {
 
     assert_eq!(az_times_bz, cz_reduce[0..8]);
     assert_eq!(kz_times_nz, knz_reduce[0..8]);
-    let count_after_az_bz_kz_nz = env::get_cycle_count();
+    let count_after_az_bz_kz_nz = env::cycle_count();
 
-    let count_before_reduce_c_kn = env::get_cycle_count();
+    let count_before_reduce_c_kn = env::cycle_count();
 
     let mut c_reduce_limbs = [0u32; 129];
     let mut kn_reduce_limbs = [0u32; 129];
@@ -583,13 +585,13 @@ fn main() {
         kn_reduce_limbs[i * 3 + 2] = cur_limb[2];
     }
 
-    let count_after_reduce_c_kn = env::get_cycle_count();
+    let count_after_reduce_c_kn = env::cycle_count();
 
-    let count_before_c_minus_kn = env::get_cycle_count();
+    let count_before_c_minus_kn = env::cycle_count();
 
     let borrow = sub_and_borrow::<129>(&mut c_reduce_limbs, &kn_reduce_limbs);
 
-    let count_after_c_minus_kn = env::get_cycle_count();
+    let count_after_c_minus_kn = env::cycle_count();
 
     let mut ok_flag = borrow == 0;
     for i in 64..129 {
@@ -597,7 +599,7 @@ fn main() {
     }
     assert!(ok_flag);
 
-    let count_before_final_reduction = env::get_cycle_count();
+    let count_before_final_reduction = env::cycle_count();
 
     let mut u = [0u32; 64];
     let mut borrow = 0u32;
@@ -616,9 +618,9 @@ fn main() {
         }
     }
 
-    let count_after_final_reduction = env::get_cycle_count();
+    let count_after_final_reduction = env::cycle_count();
 
-    let overall = env::get_cycle_count();
+    let overall = env::cycle_count();
 
     println!("total cycle = {}", overall);
     println!(
