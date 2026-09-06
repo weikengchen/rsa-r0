@@ -1,4 +1,6 @@
+# RISC Zero 2.3 documents rustc 1.85. This repo does not commit Cargo.lock, and
+# current crates.io transitive deps (e.g. enum-ordinalize, ICU) require 1.89.
 [toolchain]
-channel = "1.85"
+channel = "1.89"
 components = [ "rustfmt", "rust-src" ]
 profile = "minimal"
